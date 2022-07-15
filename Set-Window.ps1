@@ -8,8 +8,8 @@ Function Set-Window {
             Sets the window size (height,width) and coordinates (x,y) of
             a process window.
 
-        .PARAMETER ProcessName
-            Name of the process to determine the window characteristics
+        .PARAMETER ProcessId
+            Id of the process to determine the window characteristics
 
         .PARAMETER X
             Set the position of the window in pixels from the top.
@@ -30,6 +30,8 @@ Function Set-Window {
             Name: Set-Window
             Author: Boe Prox
             Version History
+                1.1//Flandersen - 7/15/2022
+                    - Supplying ProcessID instead of ProcessName for unambiguity
                 1.0//Boe Prox - 11/24/2015
                     - Initial build
 
@@ -52,7 +54,7 @@ Function Set-Window {
     [cmdletbinding()]
     Param (
         [parameter(ValueFromPipelineByPropertyName=$True)]
-        $ProcessName,
+        [int]$ProcessId,
         [int]$X,
         [int]$Y,
         [int]$Width,
@@ -86,8 +88,9 @@ Function Set-Window {
     }
     Process {
         $Rectangle = New-Object RECT
-        $Handle = (Get-Process -Name $ProcessName).MainWindowHandle
+        $Handle = (Get-Process -Id $ProcessId).MainWindowHandle
         $Return = [Window]::GetWindowRect($Handle,[ref]$Rectangle)
+
         If (-NOT $PSBoundParameters.ContainsKey('Width')) {            
             $Width = $Rectangle.Right - $Rectangle.Left            
         }
@@ -116,7 +119,6 @@ Function Set-Window {
                     BottomRight = $BottomRight
                 }
                 $Object.PSTypeNames.insert(0,'System.Automation.WindowInfo')
-                $Object            
             }
         }
     }
